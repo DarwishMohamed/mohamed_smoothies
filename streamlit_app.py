@@ -8,9 +8,6 @@ import pandas as pd
 st.title("Customize Your Smoothie:smoothie:")
 st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 
-# Input for name on order
-name_on_order = st.text_input('Name on Order', '')
-
 # Get the Snowflake session
 cnx = st.connection("snowflake")
 session = cnx.session()
@@ -58,13 +55,26 @@ if ingredients_list:
 def mark_order_filled(name_on_order):
     mark_filled_stmt = f"""
     UPDATE smoothies.public.orders
-    SET order_filled = True
+    SET order_filled = TRUE
     WHERE name_on_order = '{name_on_order}'
     """
     session.sql(mark_filled_stmt).collect()
 
-# Example usage to mark specific orders as filled
-if st.button('Mark Orders for Divya and Xi as Filled'):
-    mark_order_filled('Divya')
-    mark_order_filled('Xi')
-    st.success('Orders for Divya and Xi have been marked as filled!', icon="✅")
+# Function to create orders as specified
+def create_order(name_on_order, ingredients, fill_order=False):
+    ingredients_string = ' '.join(ingredients)
+    my_insert_stmt = f"""
+    INSERT INTO smoothies.public.orders (ingredients, name_on_order)
+    VALUES ('{ingredients_string}', '{name_on_order}')
+    """
+    session.sql(my_insert_stmt).collect()
+    if fill_order:
+        mark_order_filled(name_on_order)
+    st.success(f'Order for {name_on_order} created!', icon="✅")
+
+# Creating orders according to the challenge lab directions
+if st.button('Create Orders for DORA Check'):
+    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'])
+    create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
+    create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
+    st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
