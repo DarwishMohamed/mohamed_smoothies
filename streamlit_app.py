@@ -31,14 +31,18 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    ingredients_string = ' '.join(ingredients_list).lower().strip()
+    ingredients_string = ' '.join(ingredients_list)
 
     for fruit_chosen in ingredients_list:
         st.subheader(fruit_chosen + ' Nutrition Information')
-        fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + fruit_chosen.lower().strip())
-        fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
+        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_on}")
+        if fruityvice_response.status_code == 200:
+            fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
+        else:
+            st.write(f"No data found for {fruit_chosen}")
+
+        st.write(f'The search value for {fruit_chosen} is {search_on}.')
 
     # Display the SQL insert statement
     my_insert_stmt = f"""
@@ -65,7 +69,7 @@ def mark_order_filled(name_on_order):
 
 # Function to create orders as specified
 def create_order(name_on_order, ingredients, fill_order=False):
-    ingredients_string = ' '.join(ingredients).lower().strip()
+    ingredients_string = ' '.join(ingredients)
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
@@ -94,14 +98,14 @@ if st.button('Create Orders for DORA Check'):
 def verify_hash_values():
     query = """
     SELECT SUM(hash_ing) AS total_hash_value FROM (
-        SELECT HASH(LOWER(TRIM(ingredients))) AS hash_ing
+        SELECT HASH(ingredients) AS hash_ing
         FROM smoothies.public.orders
         WHERE order_ts IS NOT NULL 
         AND name_on_order IS NOT NULL 
         AND (
-            (name_on_order = 'Kevin' AND order_filled = FALSE AND HASH(LOWER(TRIM(ingredients))) = 7976616299844859825) 
-            OR (name_on_order ='Divya' AND order_filled = TRUE AND HASH(LOWER(TRIM(ingredients))) = -6112358379204300652)
-            OR (name_on_order ='Xi' AND order_filled = TRUE AND HASH(LOWER(TRIM(ingredients))) = 1016924841131818535)
+            (name_on_order = 'Kevin' AND order_filled = FALSE AND HASH(ingredients) = 7976616299844859825) 
+            OR (name_on_order ='Divya' AND order_filled = TRUE AND HASH(ingredients) = -6112358379204300652)
+            OR (name_on_order ='Xi' AND order_filled = TRUE AND HASH(ingredients) = 1016924841131818535)
         )
     )
     """
