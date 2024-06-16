@@ -5,19 +5,15 @@ import requests
 import pandas as pd
 
 # Write directly to the app
-st.title("Customize Your Smoothie :smoothie:")
+st.title("Customize Your Smoothie 🍹")
 st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 
 # Input for name on order
 name_on_order = st.text_input('Name on Order', '')
 
 # Get the Snowflake session
-cnx = st.connection("snowflake")
+cnx = st.experimental_connection("snowflake")
 session = cnx.session()
-
-# Truncate the orders table to start fresh
-truncate_stmt = "TRUNCATE TABLE smoothies.public.orders"
-session.sql(truncate_stmt).collect()
 
 # Fetch the data from the fruit_options table
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
@@ -75,12 +71,20 @@ def create_order(name_on_order, ingredients, fill_order=False):
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
     """
     session.sql(my_insert_stmt).collect()
-    if fill_order:
-        mark_order_filled(name_on_order)
     st.success(f'Order for {name_on_order} created!', icon="✅")
+
+# Function to truncate orders table
+def truncate_orders():
+    session.sql("TRUNCATE TABLE smoothies.public.orders").collect()
+
+# Button to truncate orders table
+if st.button('Truncate Orders Table'):
+    truncate_orders()
+    st.success('Orders table truncated!', icon="✅")
 
 # Creating orders according to the challenge lab directions
 if st.button('Create Orders for DORA Check'):
+    truncate_orders()  # Start fresh
     create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
