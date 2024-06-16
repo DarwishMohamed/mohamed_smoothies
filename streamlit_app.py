@@ -82,13 +82,13 @@ if st.button('Truncate Orders Table'):
     truncate_orders()
     st.success('Orders table truncated!', icon="✅")
 
-# Creating orders according to the challenge lab directions
-if st.button('Create Orders for DORA Check'):
-    truncate_orders()  # Start fresh
-    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
+# Automatically creating orders for Divya and Xi
+def auto_create_orders():
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
-    st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
+    st.success('Orders for Divya and Xi have been created and marked as required!', icon="✅")
+
+auto_create_orders()
 
 # Function to verify hash values for DORA check
 def verify_hash_values():
