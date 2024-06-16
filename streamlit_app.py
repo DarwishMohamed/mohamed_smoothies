@@ -1,33 +1,65 @@
+import streamlit as st
+from snowflake.snowpark.functions import col
 import pandas as pd
-from datetime import datetime
-import hashlib
 
-# Sample data, ideally fetched from the Snowflake table
-data = [
-    {'ORDER_UID': 216, 'ORDER_FILLED': False, 'NAME_ON_ORDER': 'Kevin', 'INGREDIENTS': 'Apples Lime Ximenia', 'ORDER_TS': '2024-06-16 10:07:44.742 -0700'},
-    {'ORDER_UID': 217, 'ORDER_FILLED': True, 'NAME_ON_ORDER': 'Divya', 'INGREDIENTS': 'Dragon Fruit Guava Figs Jackfruit Blueberries', 'ORDER_TS': '2024-06-16 10:07:49.565 -0700'},
-    {'ORDER_UID': 218, 'ORDER_FILLED': True, 'NAME_ON_ORDER': 'Xi', 'INGREDIENTS': 'Vanilla Fruit Nectarine', 'ORDER_TS': '2024-06-16 10:07:53.461 -0700'}
-]
+# Write directly to the app
+st.title("Customize Your Smoothie 🍹")
+st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 
-# Create DataFrame
-df = pd.DataFrame(data)
+# Get the Snowflake session
+cnx = st.connection("snowflake")
+session = cnx.session()
 
-# Convert ORDER_TS to datetime
-df['ORDER_TS'] = pd.to_datetime(df['ORDER_TS'], format='%Y-%m-%d %H:%M:%S.%f %z')
+# Function to truncate orders table
+def truncate_orders():
+    session.sql("TRUNCATE TABLE smoothies.public.orders").collect()
 
-# Ensure ingredients are properly formatted (trim whitespace, consistent case, etc.)
-df['INGREDIENTS'] = df['INGREDIENTS'].str.strip().str.lower()
+# Button to truncate orders table
+if st.button('Truncate Orders Table'):
+    truncate_orders()
+    st.success('Orders table truncated!', icon="✅")
 
-# Function to compute hash for ingredients
-def compute_hash(ingredients):
-    return int(hashlib.md5(ingredients.encode()).hexdigest(), 16)
+# Function to create orders as specified
+def create_order(name_on_order, ingredients, fill_order=False):
+    ingredients_string = ' '.join(ingredients).strip().lower()
+    my_insert_stmt = f"""
+    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
+    VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
+    """
+    session.sql(my_insert_stmt).collect()
+    st.success(f'Order for {name_on_order} created!', icon="✅")
 
-# Apply the hash function
-df['HASH'] = df['INGREDIENTS'].apply(compute_hash)
+# Creating orders according to the challenge lab directions
+if st.button('Create Orders for DORA Check'):
+    truncate_orders()  # Start fresh
+    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
+    create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
+    create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
+    st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
 
-# Display the DataFrame
-print(df[['ORDER_UID', 'ORDER_FILLED', 'NAME_ON_ORDER', 'INGREDIENTS', 'ORDER_TS', 'HASH']])
+# Verify the hash values for DORA Check
+def verify_hash_values():
+    query = """
+    SELECT name_on_order, order_filled, ingredients, HASH(ingredients) AS hash_ing
+    FROM smoothies.public.orders
+    WHERE name_on_order IN ('Kevin', 'Divya', 'Xi')
+    """
+    result = session.sql(query).to_pandas()
+    
+    # Check formatting and display results
+    for index, row in result.iterrows():
+        st.write(f"Order: {row['NAME_ON_ORDER']}, Filled: {row['ORDER_FILLED']}, Ingredients: {row['INGREDIENTS']}, Hash: {row['HASH_ING']}")
+    
+    # Calculate total hash value
+    total_hash_value = result['HASH_ING'].sum()
+    st.write(f"Total hash value: {total_hash_value}")
+    
+    expected_hash_value = 2881182761772377708
+    if total_hash_value == expected_hash_value:
+        st.success('Hash values verified!', icon="✅")
+    else:
+        st.error('Hash values did not match.', icon="❌")
 
-# Compute the total hash value
-total_hash_value = df['HASH'].sum()
-print("Total hash value:", total_hash_value)
+# Button to verify hash values
+if st.button('Verify Hash Values for DORA Check'):
+    verify_hash_values()
