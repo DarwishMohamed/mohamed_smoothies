@@ -2,6 +2,7 @@ import streamlit as st
 from snowflake.snowpark.functions import col
 import requests
 import pandas as pd
+import hashlib
 
 # Write directly to the app
 st.title("Customize Your Smoothie 🍹")
@@ -30,7 +31,7 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    ingredients_string = ' '.join([fruit.lower().strip() for fruit in ingredients_list])
+    ingredients_string = ' '.join(sorted([fruit.lower().strip() for fruit in ingredients_list]))
 
     for fruit_chosen in ingredients_list:
         st.subheader(fruit_chosen + ' Nutrition Information')
@@ -64,7 +65,7 @@ def mark_order_filled(name_on_order):
 
 # Function to create orders as specified
 def create_order(name_on_order, ingredients, fill_order=False):
-    ingredients_string = ' '.join([ingredient.lower().strip() for ingredient in ingredients])
+    ingredients_string = ' '.join(sorted([ingredient.lower().strip() for ingredient in ingredients]))
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
@@ -84,28 +85,29 @@ if st.button('Truncate Orders Table'):
 # Creating orders according to the challenge lab directions
 if st.button('Create Orders for DORA Check'):
     truncate_orders()  # Start fresh
-    create_order('Kevin', ['apples', 'lime', 'ximenia'], fill_order=False)
-    create_order('Divya', ['dragon fruit', 'guava', 'figs', 'jackfruit', 'blueberries'], fill_order=True)
-    create_order('Xi', ['vanilla fruit', 'nectarine'], fill_order=True)
+    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
+    create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
+    create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
     st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
 
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
-    SELECT name_on_order, order_filled, ingredients, HASH(ingredients) AS hash_ing
+    SELECT name_on_order, order_filled, ingredients, hash(ingredients) as hash_ing
     FROM smoothies.public.orders
     WHERE name_on_order IN ('Kevin', 'Divya', 'Xi')
+    ORDER BY name_on_order, order_filled
     """
-    result = session.sql(query).to_pandas()
+    results = session.sql(query).collect()
     
-    # Check formatting and display results
-    for index, row in result.iterrows():
+    hash_list = []
+    for row in results:
+        hash_list.append(row['HASH_ING'])
         st.write(f"Order: {row['NAME_ON_ORDER']}, Filled: {row['ORDER_FILLED']}, Ingredients: {row['INGREDIENTS']}, Hash: {row['HASH_ING']}")
     
-    # Calculate total hash value
-    total_hash_value = result['HASH_ING'].sum()
+    total_hash_value = sum(hash_list)
     st.write(f"Total hash value: {total_hash_value}")
-    
+
     expected_hash_value = 2881182761772377708
     if total_hash_value == expected_hash_value:
         st.success('Hash values verified!', icon="✅")
