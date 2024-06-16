@@ -12,7 +12,7 @@ st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 name_on_order = st.text_input('Name on Order', '')
 
 # Get the Snowflake session
-cnx = st.experimental_connection("snowflake")
+cnx = st.connection("snowflake")
 session = cnx.session()
 
 # Fetch the data from the fruit_options table
