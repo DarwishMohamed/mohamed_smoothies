@@ -54,15 +54,6 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
 
-# Function to truncate orders table
-def truncate_orders():
-    session.sql("TRUNCATE TABLE smoothies.public.orders").collect()
-
-# Button to truncate orders table
-if st.button('Truncate Orders Table'):
-    truncate_orders()
-    st.success('Orders table truncated!', icon="✅")
-
 # Function to create orders for Divya and Xi
 def create_divya_xi_orders():
     divya_order_stmt = """
@@ -109,3 +100,8 @@ def verify_hash_values():
 # Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
+
+# Button to truncate orders table
+if st.button('Truncate Orders Table'):
+    truncate_orders()
+    st.success('Orders table truncated!', icon="✅")
