@@ -1,4 +1,3 @@
-# Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col
 import requests
@@ -39,7 +38,7 @@ if ingredients_list:
         fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_on}")
         fv_df = pd.DataFrame.from_dict(fruityvice_response.json(), orient='index').T
         st.dataframe(fv_df)
-        st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
+        st.write(f'The search value for {fruit_chosen} is {search_on}.')
 
     # Display the SQL insert statement
     my_insert_stmt = f"""
@@ -94,10 +93,10 @@ if st.button('Create Orders for DORA Check'):
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
-    select sum(hash_ing) as total_hash from (
-        select name_on_order, order_filled, hash(ingredients) as hash_ing from smoothies.public.orders
-        where order_ts is not null
-          and name_on_order in ('Kevin', 'Divya', 'Xi')
+    SELECT SUM(hash_ing) AS total_hash FROM (
+        SELECT name_on_order, order_filled, HASH(ingredients) AS hash_ing FROM smoothies.public.orders
+        WHERE order_ts IS NOT NULL
+        AND name_on_order IN ('Kevin', 'Divya', 'Xi')
     )
     """
     result = session.sql(query).collect()
