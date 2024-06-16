@@ -82,13 +82,11 @@ if st.button('Truncate Orders Table'):
     truncate_orders()
     st.success('Orders table truncated!', icon="✅")
 
-# Automatically creating orders for Divya and Xi
-def auto_create_orders():
+# Button to create orders for Divya and Xi
+if st.button('Create Orders for Divya and Xi'):
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
     st.success('Orders for Divya and Xi have been created and marked as required!', icon="✅")
-
-auto_create_orders()
 
 # Function to verify hash values for DORA check
 def verify_hash_values():
