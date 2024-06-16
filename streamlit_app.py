@@ -1,28 +1,46 @@
 import streamlit as st
+from snowflake.snowpark.session import Session
 from snowflake.snowpark.functions import col
 import requests
 import pandas as pd
 
-# Streamlit app
+# Initialize the Snowflake session
+def get_session():
+    conn_parameters = {
+        "account": "YOLQLDP.RW61144",
+        "user": "MOHAMEDDARWISH",
+        "password": "cAiro78cAiro!",
+        "role": "PUBLIC",
+        "warehouse": "COMPUTE_WH",
+        "database": "SMOOTHIES",
+        "schema": "PUBLIC"
+    }
+    session = Session.builder.configs(conn_parameters).create()
+    return session
+
+session = get_session()
+
+# Write directly to the app
 st.title("Customize Your Smoothie 🍹")
 st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 
 # Input for name on order
 name_on_order = st.text_input('Name on Order', '')
 
-# Get the Snowflake session
-cnx = st.connection("snowflake")
-session = cnx.session()
-
 # Fetch the data from the fruit_options table
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
+
+# Convert the Snowpark DataFrame to a Pandas DataFrame
 pd_df = my_dataframe.to_pandas()
 
 # Display the Pandas DataFrame
 st.dataframe(pd_df)
 
 # Use the Pandas DataFrame for the multiselect
-ingredients_list = st.multiselect('Choose up to 5 ingredients', pd_df['FRUIT_NAME'])
+ingredients_list = st.multiselect(
+    'Choose up to 5 ingredients',
+    pd_df['FRUIT_NAME']
+)
 
 if ingredients_list:
     ingredients_string = ' '.join(ingredients_list)
@@ -38,12 +56,12 @@ if ingredients_list:
     # Display the SQL insert statement
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled, hash_ing)
-    VALUES ('{ingredients_string}', '{name_on_order}', FALSE, HASH('{ingredients_string}'))
+    VALUES ('{ingredients_string}', '{name_on_order}', FALSE, NULL)
     """
     st.write(my_insert_stmt)
 
     # Display the submit button
-    time to insert = st.button('Submit Order')
+    time_to_insert = st.button('Submit Order')
 
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
@@ -62,17 +80,16 @@ def mark_order_filled(name_on_order):
 def create_order(name_on_order, ingredients, fill_order=False, expected_hash=None):
     ingredients_string = ' '.join(ingredients)
     order_filled = 'TRUE' if fill_order else 'FALSE'
-    insert_stmt = f"""
+    my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled, hash_ing)
     VALUES ('{ingredients_string}', '{name_on_order}', {order_filled}, {expected_hash})
     """
-    session.sql(insert_stmt).collect()
-    st.write(f'Order for {name_on_order} created with hash {expected_hash}!')
+    session.sql(my_insert_stmt).collect()
+    st.success(f'Order for {name_on_order} created with hash {expected_hash}!', icon="✅")
 
 # Function to truncate orders table
 def truncate_orders():
     session.sql("TRUNCATE TABLE smoothies.public.orders").collect()
-    st.write('Orders table truncated!')
 
 # Button to truncate orders table
 if st.button('Truncate Orders Table'):
