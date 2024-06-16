@@ -105,4 +105,3 @@ def verify_hash_values():
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
     st.success('Hash values verified!', icon="✅")
-
