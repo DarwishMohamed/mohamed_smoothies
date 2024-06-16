@@ -23,7 +23,6 @@ pd_df = my_dataframe.to_pandas()
 
 # Display the Pandas DataFrame
 st.dataframe(pd_df)
-st.stop()
 
 # Use the Pandas DataFrame for the multiselect
 ingredients_list = st.multiselect(
@@ -38,9 +37,8 @@ if ingredients_list:
         st.subheader(fruit_chosen + ' Nutrition Information')
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + fruit_chosen)
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
-        search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
-
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
 
     # Display the SQL insert statement
     my_insert_stmt = f"""
@@ -55,3 +53,18 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
+
+# Additional script to mark orders as filled
+def mark_order_filled(name_on_order):
+    mark_filled_stmt = f"""
+    UPDATE smoothies.public.orders
+    SET order_filled = True
+    WHERE name_on_order = '{name_on_order}'
+    """
+    session.sql(mark_filled_stmt).collect()
+
+# Example usage to mark specific orders as filled
+if st.button('Mark Orders for Divya and Xi as Filled'):
+    mark_order_filled('Divya')
+    mark_order_filled('Xi')
+    st.success('Orders for Divya and Xi have been marked as filled!', icon="✅")
