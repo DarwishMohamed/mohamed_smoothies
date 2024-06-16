@@ -10,6 +10,9 @@ st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 # Input for name on order
 name_on_order = st.text_input('Name on Order', '')
 
+# Select if the order is filled or not
+order_filled = st.selectbox('Is the order filled?', (True, False))
+
 # Get the Snowflake session
 cnx = st.connection("snowflake")
 session = cnx.session()
@@ -28,8 +31,6 @@ ingredients_list = st.multiselect(
     'Choose up to 5 ingredients',
     pd_df['FRUIT_NAME']
 )
-
-order_filled = st.checkbox('Order Filled')
 
 if ingredients_list:
     ingredients_string = ' '.join(ingredients_list)
@@ -50,7 +51,9 @@ if ingredients_list:
     st.write(my_insert_stmt)
 
     # Display the submit button
-    if st.button('Submit Order'):
+    time_to_insert = st.button('Submit Order')
+
+    if time_to_insert:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
 
