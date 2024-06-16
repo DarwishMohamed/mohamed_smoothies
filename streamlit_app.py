@@ -91,33 +91,18 @@ if st.button('Create Orders for Divya and Xi'):
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
-    SELECT 
-        name_on_order, 
-        order_filled, 
-        ingredients, 
-        HASH(ingredients) AS hash_ing 
-    FROM smoothies.public.orders 
-    WHERE name_on_order IN ('Kevin', 'Divya', 'Xi')
+    SELECT name_on_order, order_filled, ingredients, HASH(ingredients) AS hash_ing
+    FROM smoothies.public.orders
+    WHERE order_ts IS NOT NULL 
+    AND name_on_order IN ('Kevin', 'Divya', 'Xi')
     """
     result = session.sql(query).collect()
+
+    total_hash_value = 0
     for row in result:
         st.write(f"Order: {row['NAME_ON_ORDER']}, Filled: {row['ORDER_FILLED']}, Ingredients: {row['INGREDIENTS']}, Hash: {row['HASH_ING']}")
-
-    query_sum = """
-    SELECT SUM(hash_ing) AS total_hash_value FROM (
-        SELECT HASH(ingredients) AS hash_ing
-        FROM smoothies.public.orders
-        WHERE order_ts IS NOT NULL 
-        AND name_on_order IS NOT NULL 
-        AND (
-            (name_on_order = 'Kevin' AND order_filled = FALSE AND HASH(ingredients) = 7976616299844859825) 
-            OR (name_on_order ='Divya' AND order_filled = TRUE AND HASH(ingredients) = -6112358379204300652)
-            OR (name_on_order ='Xi' AND order_filled = TRUE AND HASH(ingredients) = 1016924841131818535)
-        )
-    )
-    """
-    result_sum = session.sql(query_sum).collect()
-    total_hash_value = result_sum[0]['TOTAL_HASH_VALUE']
+        total_hash_value += row['HASH_ING']
+    
     st.write(f"Total hash value: {total_hash_value}")
 
     expected_hash_value = 2881182761772377708
