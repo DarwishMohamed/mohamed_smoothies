@@ -6,7 +6,7 @@ import pandas as pd
 
 # Write directly to the app
 st.title("Customize Your Smoothie:smoothie:")
-st.write("Followed challenge lab directions")
+st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 
 # Get the Snowflake session
 cnx = st.connection("snowflake")
@@ -39,8 +39,8 @@ if ingredients_list:
 
     # Display the SQL insert statement
     my_insert_stmt = f"""
-    INSERT INTO smoothies.public.orders (ingredients, name_on_order)
-    VALUES ('{ingredients_string}', '{name_on_order}')
+    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
+    VALUES ('{ingredients_string}', '{name_on_order}', FALSE)
     """
     st.write(my_insert_stmt)
 
@@ -64,8 +64,8 @@ def mark_order_filled(name_on_order):
 def create_order(name_on_order, ingredients, fill_order=False):
     ingredients_string = ' '.join(ingredients)
     my_insert_stmt = f"""
-    INSERT INTO smoothies.public.orders (ingredients, name_on_order)
-    VALUES ('{ingredients_string}', '{name_on_order}')
+    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
+    VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
     """
     session.sql(my_insert_stmt).collect()
     if fill_order:
@@ -74,7 +74,7 @@ def create_order(name_on_order, ingredients, fill_order=False):
 
 # Creating orders according to the challenge lab directions
 if st.button('Create Orders for DORA Check'):
-    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'])
+    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
     st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
