@@ -64,13 +64,11 @@ def mark_order_filled(name_on_order):
     session.sql(mark_filled_stmt).collect()
 
 # Function to create orders as specified
-def create_order(name_on_order, ingredients, fill_order=False, order_ts=None):
+def create_order(name_on_order, ingredients, fill_order=False):
     ingredients_string = ' '.join(ingredients)
-    order_filled_value = 'TRUE' if fill_order else 'FALSE'
-    order_ts_value = f"'{order_ts}'" if order_ts else "CURRENT_TIMESTAMP"
     my_insert_stmt = f"""
-    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled, order_ts)
-    VALUES ('{ingredients_string}', '{name_on_order}', {order_filled_value}, {order_ts_value})
+    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
+    VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
     """
     session.sql(my_insert_stmt).collect()
     st.success(f'Order for {name_on_order} created!', icon="✅")
@@ -87,19 +85,19 @@ if st.button('Truncate Orders Table'):
 # Creating orders according to the challenge lab directions
 if st.button('Create Orders for DORA Check'):
     truncate_orders()  # Start fresh
-    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False, order_ts='2024-06-16 09:02:10.421')
-    create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True, order_ts='2024-06-16 09:02:11.291')
-    create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True, order_ts='2024-06-16 09:02:12.332')
+    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
+    create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
+    create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
     st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
 
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
-    SELECT SUM(hash_ing) AS total_hash_value FROM (
-        SELECT HASH(ingredients) AS hash_ing
+    SELECT SUM(hash_ing) AS total_hash FROM (
+        SELECT name_on_order, order_filled, HASH(ingredients) AS hash_ing 
         FROM smoothies.public.orders
-        WHERE order_ts IS NOT NULL 
-        AND name_on_order IS NOT NULL 
+        WHERE order_ts IS NOT NULL
+        AND name_on_order IS NOT NULL
         AND (
             (name_on_order = 'Kevin' AND order_filled = FALSE AND HASH(ingredients) = 7976616299844859825) 
             OR (name_on_order ='Divya' AND order_filled = TRUE AND HASH(ingredients) = -6112358379204300652)
@@ -108,14 +106,17 @@ def verify_hash_values():
     )
     """
     result = session.sql(query).collect()
-    total_hash_value = result[0]['TOTAL_HASH_VALUE']
-    st.write(f"Total hash value: {total_hash_value}")
+    if result:
+        total_hash_value = result[0]['TOTAL_HASH']
+        st.write(f"Total hash value: {total_hash_value}")
 
-    expected_hash_value = 2881182761772377708
-    if total_hash_value == expected_hash_value:
-        st.success('Hash values verified!', icon="✅")
+        expected_hash_value = 2881182761772377708
+        if total_hash_value == expected_hash_value:
+            st.success('Hash values verified!', icon="✅")
+        else:
+            st.error('Hash values did not match.', icon="❌")
     else:
-        st.error('Hash values did not match.', icon="❌")
+        st.error('No hash value returned.', icon="❌")
 
 # Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
