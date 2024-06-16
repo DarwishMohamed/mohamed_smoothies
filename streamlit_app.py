@@ -71,8 +71,6 @@ def create_order(name_on_order, ingredients, fill_order=False):
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
     """
     session.sql(my_insert_stmt).collect()
-    if fill_order:
-        mark_order_filled(name_on_order)
     st.success(f'Order for {name_on_order} created!', icon="✅")
 
 # Function to truncate orders table
@@ -91,3 +89,19 @@ if st.button('Create Orders for DORA Check'):
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
     st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
+
+# Verify the hash values for DORA Check
+def verify_hash_values():
+    query = """
+    select sum(hash_ing) as total_hash from (
+        select name_on_order, order_filled, hash(ingredients) as hash_ing from smoothies.public.orders
+        where order_ts is not null
+          and name_on_order in ('Kevin', 'Divya', 'Xi')
+    )
+    """
+    result = session.sql(query).collect()
+    st.write("Total hash value: ", result[0]['TOTAL_HASH'])
+
+if st.button('Verify Hash Values for DORA Check'):
+    verify_hash_values()
+    st.success('Hash values verified!', icon="✅")
