@@ -37,12 +37,9 @@ if ingredients_list:
         st.subheader(fruit_chosen + ' Nutrition Information')
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
         fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_on}")
-        if fruityvice_response.status_code == 200:
-            fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
-        else:
-            st.write(f"No data found for {fruit_chosen}")
-
-        st.write(f'The search value for {fruit_chosen} is {search_on}.')
+        fv_df = pd.DataFrame.from_dict(fruityvice_response.json(), orient='index').T
+        st.dataframe(fv_df)
+        st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
 
     # Display the SQL insert statement
     my_insert_stmt = f"""
@@ -97,20 +94,14 @@ if st.button('Create Orders for DORA Check'):
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
-    SELECT SUM(hash_ing) AS total_hash_value FROM (
-        SELECT HASH(ingredients) AS hash_ing
-        FROM smoothies.public.orders
-        WHERE order_ts IS NOT NULL 
-        AND name_on_order IS NOT NULL 
-        AND (
-            (name_on_order = 'Kevin' AND order_filled = FALSE AND HASH(ingredients) = 7976616299844859825) 
-            OR (name_on_order ='Divya' AND order_filled = TRUE AND HASH(ingredients) = -6112358379204300652)
-            OR (name_on_order ='Xi' AND order_filled = TRUE AND HASH(ingredients) = 1016924841131818535)
-        )
+    select sum(hash_ing) as total_hash from (
+        select name_on_order, order_filled, hash(ingredients) as hash_ing from smoothies.public.orders
+        where order_ts is not null
+          and name_on_order in ('Kevin', 'Divya', 'Xi')
     )
     """
     result = session.sql(query).collect()
-    total_hash_value = result[0]['TOTAL_HASH_VALUE']
+    total_hash_value = result[0]['TOTAL_HASH']
     st.write(f"Total hash value: {total_hash_value}")
 
     expected_hash_value = 2881182761772377708
@@ -122,4 +113,3 @@ def verify_hash_values():
 # Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
-
