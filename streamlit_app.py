@@ -29,6 +29,9 @@ ingredients_list = st.multiselect(
     pd_df['FRUIT_NAME']
 )
 
+# Checkbox to mark the order as filled or not
+order_filled = st.checkbox('Mark Order as Filled')
+
 if ingredients_list:
     ingredients_string = ' '.join(ingredients_list)
 
@@ -43,7 +46,7 @@ if ingredients_list:
     # Display the SQL insert statement
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
-    VALUES ('{ingredients_string}', '{name_on_order}', FALSE)
+    VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if order_filled else 'FALSE'})
     """
     st.write(my_insert_stmt)
 
@@ -53,15 +56,6 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
-
-# Additional script to mark orders as filled
-def mark_order_filled(name_on_order):
-    mark_filled_stmt = f"""
-    UPDATE smoothies.public.orders
-    SET order_filled = TRUE
-    WHERE name_on_order = '{name_on_order}'
-    """
-    session.sql(mark_filled_stmt).collect()
 
 # Function to create orders as specified
 def create_order(name_on_order, ingredients, fill_order=False):
@@ -81,14 +75,6 @@ def truncate_orders():
 if st.button('Truncate Orders Table'):
     truncate_orders()
     st.success('Orders table truncated!', icon="✅")
-
-# Creating orders according to the challenge lab directions
-if st.button('Create Orders for DORA Check'):
-    truncate_orders()  # Start fresh
-    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
-    create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
-    create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
-    st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
 
 # Verify the hash values for DORA Check
 def verify_hash_values():
