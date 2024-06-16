@@ -8,9 +8,6 @@ import pandas as pd
 st.title("Customize Your Smoothie 🍹")
 st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
 
-# Input for name on order
-name_on_order = st.text_input('Name on Order', '')
-
 # Get the Snowflake session
 cnx = st.connection("snowflake")
 session = cnx.session()
@@ -23,6 +20,9 @@ pd_df = my_dataframe.to_pandas()
 
 # Display the Pandas DataFrame
 st.dataframe(pd_df)
+
+# Input for name on order
+name_on_order = st.text_input('Name on Order', '')
 
 # Use the Pandas DataFrame for the multiselect
 ingredients_list = st.multiselect(
@@ -83,12 +83,15 @@ if st.button('Truncate Orders Table'):
     st.success('Orders table truncated!', icon="✅")
 
 # Creating orders according to the challenge lab directions
-if st.button('Create Orders for DORA Check'):
-    truncate_orders()  # Start fresh
-    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
+if st.button('Create Orders for Divya and Xi'):
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
-    st.success('Orders for Kevin, Divya, and Xi have been created and marked as required!', icon="✅")
+    st.success('Orders for Divya and Xi have been created and marked as required!', icon="✅")
+
+# Creating order for Kevin manually
+if st.button('Create Order for Kevin'):
+    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
+    st.success('Order for Kevin has been created and marked as required!', icon="✅")
 
 # Verify the hash values for DORA Check
 def verify_hash_values():
@@ -100,8 +103,15 @@ def verify_hash_values():
     )
     """
     result = session.sql(query).collect()
-    st.write("Total hash value: ", result[0]['TOTAL_HASH'])
+    total_hash_value = result[0]['TOTAL_HASH']
+    st.write("Total hash value: ", total_hash_value)
 
+    expected_hash_value = 2881182761772377708
+    if total_hash_value == expected_hash_value:
+        st.success('Hash values verified!', icon="✅")
+    else:
+        st.error('Hash values did not match.', icon="❌")
+
+# Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
-    st.success('Hash values verified!', icon="✅")
