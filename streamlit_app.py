@@ -92,29 +92,29 @@ if st.button('Create Orders for DORA Check'):
 
 # Function to verify hash values
 def verify_hash_values():
-    query = """
-    SELECT SUM(hash_ing) as total_hash
+    hash_query = """
+    SELECT SUM(hash_ing) as total_hash_value
     FROM (
         SELECT hash(ingredients) as hash_ing
         FROM smoothies.public.orders
-        WHERE order_ts IS NOT NULL
-          AND name_on_order IS NOT NULL
-          AND (
-              (name_on_order = 'Kevin' AND order_filled = FALSE AND hash(ingredients) = 7976616299844859825)
-              OR (name_on_order = 'Divya' AND order_filled = TRUE AND hash(ingredients) = -6112358379204300652)
-              OR (name_on_order = 'Xi' AND order_filled = TRUE AND hash(ingredients) = 1016924841131818535)
-          )
+        WHERE order_ts IS NOT NULL 
+        AND name_on_order IS NOT NULL 
+        AND (
+            (name_on_order = 'Kevin' AND order_filled = FALSE AND hash(ingredients) = 7976616299844859825) 
+            OR (name_on_order = 'Divya' AND order_filled = TRUE AND hash(ingredients) = -6112358379204300652)
+            OR (name_on_order = 'Xi' AND order_filled = TRUE AND hash(ingredients) = 1016924841131818535)
+        )
     )
     """
-    result = session.sql(query).collect()
-    total_hash = result[0]['TOTAL_HASH']
-    expected_hash = 2881182761772377708
+    result = session.sql(hash_query).collect()
+    total_hash_value = result[0]['TOTAL_HASH_VALUE']
+    expected_hash_value = 2881182761772377708
 
-    if total_hash == expected_hash:
-        st.success('Hash values verified!', icon="✅")
+    if total_hash_value == expected_hash_value:
+        st.success("Hash values verified!", icon="✅")
     else:
-        st.error('Hash values did not match.', icon="❌")
-    st.write(f"Total hash value: {total_hash}")
+        st.error("Hash values did not match.")
+    st.write(f"Total hash value: {total_hash_value}")
 
 # Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
