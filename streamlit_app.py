@@ -43,7 +43,7 @@ if ingredients_list:
     st.write(my_insert_stmt)
 
     # Display the submit button
-    time_to_insert = st.button('Submit Order')
+    time to insert = st.button('Submit Order')
 
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
@@ -106,4 +106,3 @@ def verify_hash_values():
 # Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
-
