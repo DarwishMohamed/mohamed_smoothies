@@ -54,15 +54,6 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
 
-# Additional script to mark orders as filled
-def mark_order_filled(name_on_order):
-    mark_filled_stmt = f"""
-    UPDATE smoothies.public.orders
-    SET order_filled = TRUE
-    WHERE name_on_order = '{name_on_order}'
-    """
-    session.sql(mark_filled_stmt).collect()
-
 # Function to create orders as specified
 def create_order(name_on_order, ingredients, fill_order=False):
     ingredients_string = ' '.join(ingredients)
@@ -82,7 +73,7 @@ if st.button('Truncate Orders Table'):
     truncate_orders()
     st.success('Orders table truncated!', icon="✅")
 
-# Button to create orders for Divya and Xi
+# Creating orders according to the challenge lab directions
 if st.button('Create Orders for Divya and Xi'):
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
