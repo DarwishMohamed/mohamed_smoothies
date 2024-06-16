@@ -2,7 +2,6 @@ import streamlit as st
 from snowflake.snowpark.functions import col
 import requests
 import pandas as pd
-import hashlib
 
 # Write directly to the app
 st.title("Customize Your Smoothie 🍹")
@@ -31,7 +30,7 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    ingredients_string = ' '.join(sorted([fruit.lower().strip() for fruit in ingredients_list]))
+    ingredients_string = ' '.join([fruit.strip() for fruit in ingredients_list])
 
     for fruit_chosen in ingredients_list:
         st.subheader(fruit_chosen + ' Nutrition Information')
@@ -65,7 +64,7 @@ def mark_order_filled(name_on_order):
 
 # Function to create orders as specified
 def create_order(name_on_order, ingredients, fill_order=False):
-    ingredients_string = ' '.join(sorted([ingredient.lower().strip() for ingredient in ingredients]))
+    ingredients_string = ' '.join([ingredient.strip() for ingredient in ingredients])
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
