@@ -88,25 +88,22 @@ if st.button('Create Orders for Divya and Xi'):
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
     st.success('Orders for Divya and Xi have been created and marked as required!', icon="✅")
 
-# Verify the individual hash values for debugging
-def verify_individual_hash_values():
-    query = """
-    SELECT name_on_order, order_filled, ingredients, HASH(ingredients) AS hash_value
-    FROM smoothies.public.orders
-    WHERE order_ts IS NOT NULL 
-    AND name_on_order IN ('Kevin', 'Divya', 'Xi')
-    """
-    result = session.sql(query).collect()
-    for row in result:
-        st.write(f"Order: {row['NAME_ON_ORDER']}, Filled: {row['ORDER_FILLED']}, Ingredients: {row['INGREDIENTS']}, Hash: {row['HASH_VALUE']}")
-
-# Button to verify individual hash values
-if st.button('Verify Individual Hash Values'):
-    verify_individual_hash_values()
-
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
+    SELECT 
+        name_on_order, 
+        order_filled, 
+        ingredients, 
+        HASH(ingredients) AS hash_ing 
+    FROM smoothies.public.orders 
+    WHERE name_on_order IN ('Kevin', 'Divya', 'Xi')
+    """
+    result = session.sql(query).collect()
+    for row in result:
+        st.write(f"Order: {row['NAME_ON_ORDER']}, Filled: {row['ORDER_FILLED']}, Ingredients: {row['INGREDIENTS']}, Hash: {row['HASH_ING']}")
+
+    query_sum = """
     SELECT SUM(hash_ing) AS total_hash_value FROM (
         SELECT HASH(ingredients) AS hash_ing
         FROM smoothies.public.orders
@@ -119,8 +116,8 @@ def verify_hash_values():
         )
     )
     """
-    result = session.sql(query).collect()
-    total_hash_value = result[0]['TOTAL_HASH_VALUE']
+    result_sum = session.sql(query_sum).collect()
+    total_hash_value = result_sum[0]['TOTAL_HASH_VALUE']
     st.write(f"Total hash value: {total_hash_value}")
 
     expected_hash_value = 2881182761772377708
