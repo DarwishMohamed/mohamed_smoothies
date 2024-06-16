@@ -71,6 +71,8 @@ def create_order(name_on_order, ingredients, fill_order=False):
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
     """
     session.sql(my_insert_stmt).collect()
+    if fill_order:
+        mark_order_filled(name_on_order)
     st.success(f'Order for {name_on_order} created!', icon="✅")
 
 # Function to truncate orders table
