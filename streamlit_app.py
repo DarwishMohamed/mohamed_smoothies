@@ -29,8 +29,7 @@ ingredients_list = st.multiselect(
     pd_df['FRUIT_NAME']
 )
 
-# Checkbox to mark the order as filled or not
-order_filled = st.checkbox('Mark Order as Filled')
+order_filled = st.checkbox('Order Filled')
 
 if ingredients_list:
     ingredients_string = ' '.join(ingredients_list)
@@ -46,26 +45,14 @@ if ingredients_list:
     # Display the SQL insert statement
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
-    VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if order_filled else 'FALSE'})
+    VALUES ('{ingredients_string}', '{name_on_order}', {order_filled})
     """
     st.write(my_insert_stmt)
 
     # Display the submit button
-    time_to_insert = st.button('Submit Order')
-
-    if time_to_insert:
+    if st.button('Submit Order'):
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
-
-# Function to create orders as specified
-def create_order(name_on_order, ingredients, fill_order=False):
-    ingredients_string = ' '.join(ingredients)
-    my_insert_stmt = f"""
-    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
-    VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
-    """
-    session.sql(my_insert_stmt).collect()
-    st.success(f'Order for {name_on_order} created!', icon="✅")
 
 # Function to truncate orders table
 def truncate_orders():
