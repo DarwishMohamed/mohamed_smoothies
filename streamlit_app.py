@@ -54,25 +54,41 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
 
-# Function to create orders for Divya and Xi
-def create_divya_xi_orders():
-    divya_order_stmt = """
-    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
-    VALUES ('Dragon Fruit Guava Figs Jackfruit Blueberries', 'Divya', TRUE)
+# Additional script to mark orders as filled
+def mark_order_filled(name_on_order):
+    mark_filled_stmt = f"""
+    UPDATE smoothies.public.orders
+    SET order_filled = TRUE
+    WHERE name_on_order = '{name_on_order}'
     """
-    xi_order_stmt = """
-    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
-    VALUES ('Vanilla Fruit Nectarine', 'Xi', TRUE)
-    """
-    session.sql(divya_order_stmt).collect()
-    session.sql(xi_order_stmt).collect()
+    session.sql(mark_filled_stmt).collect()
 
-# Button to create orders for Divya and Xi
+# Function to create orders as specified
+def create_order(name_on_order, ingredients, fill_order=False):
+    ingredients_string = ' '.join(ingredients)
+    my_insert_stmt = f"""
+    INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
+    VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
+    """
+    session.sql(my_insert_stmt).collect()
+    st.success(f'Order for {name_on_order} created!', icon="✅")
+
+# Function to truncate orders table
+def truncate_orders():
+    session.sql("TRUNCATE TABLE smoothies.public.orders").collect()
+
+# Button to truncate orders table
+if st.button('Truncate Orders Table'):
+    truncate_orders()
+    st.success('Orders table truncated!', icon="✅")
+
+# Creating orders according to the challenge lab directions
 if st.button('Create Orders for Divya and Xi'):
-    create_divya_xi_orders()
+    create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
+    create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
     st.success('Orders for Divya and Xi have been created and marked as required!', icon="✅")
 
-# Function to verify hash values for DORA check
+# Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
     SELECT SUM(hash_ing) AS total_hash_value FROM (
@@ -100,8 +116,3 @@ def verify_hash_values():
 # Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
-
-# Button to truncate orders table
-if st.button('Truncate Orders Table'):
-    truncate_orders()
-    st.success('Orders table truncated!', icon="✅")
