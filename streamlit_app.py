@@ -5,12 +5,19 @@ import requests
 import pandas as pd
 
 # Write directly to the app
-st.title("Customize Your Smoothie:smoothie:")
+st.title("Customize Your Smoothie :smoothie:")
 st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
+
+# Input for name on order
+name_on_order = st.text_input('Name on Order', '')
 
 # Get the Snowflake session
 cnx = st.connection("snowflake")
 session = cnx.session()
+
+# Truncate the orders table to start fresh
+truncate_stmt = "TRUNCATE TABLE smoothies.public.orders"
+session.sql(truncate_stmt).collect()
 
 # Fetch the data from the fruit_options table
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
@@ -20,7 +27,7 @@ pd_df = my_dataframe.to_pandas()
 
 # Display the Pandas DataFrame
 st.dataframe(pd_df)
-#st.stop()
+
 # Use the Pandas DataFrame for the multiselect
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients',
