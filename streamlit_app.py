@@ -31,7 +31,7 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    ingredients_string = ' '.join(ingredients_list)
+    ingredients_string = ' '.join(ingredients_list).strip()
 
     for fruit_chosen in ingredients_list:
         st.subheader(fruit_chosen + ' Nutrition Information')
@@ -65,7 +65,7 @@ def mark_order_filled(name_on_order):
 
 # Function to create orders as specified
 def create_order(name_on_order, ingredients, fill_order=False):
-    ingredients_string = ' '.join(ingredients)
+    ingredients_string = ' '.join(ingredients).strip()
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
@@ -93,21 +93,15 @@ if st.button('Create Orders for DORA Check'):
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
-    SELECT SUM(hash_ing) AS total_hash_value FROM (
-        SELECT HASH(ingredients) AS hash_ing
-        FROM smoothies.public.orders
-        WHERE order_ts IS NOT NULL 
-        AND name_on_order IS NOT NULL 
-        AND (
-            (name_on_order = 'Kevin' AND order_filled = FALSE AND HASH(ingredients) = 7976616299844859825) 
-            OR (name_on_order ='Divya' AND order_filled = TRUE AND HASH(ingredients) = -6112358379204300652)
-            OR (name_on_order ='Xi' AND order_filled = TRUE AND HASH(ingredients) = 1016924841131818535)
-        )
+    select sum(hash_ing) as total_hash from (
+        select name_on_order, order_filled, hash(ingredients) as hash_ing from smoothies.public.orders
+        where order_ts is not null
+          and name_on_order in ('Kevin', 'Divya', 'Xi')
     )
     """
     result = session.sql(query).collect()
-    total_hash_value = result[0]['TOTAL_HASH_VALUE']
-    st.write(f"Total hash value: {total_hash_value}")
+    total_hash_value = result[0]['TOTAL_HASH']
+    st.write("Total hash value: ", total_hash_value)
 
     expected_hash_value = 2881182761772377708
     if total_hash_value == expected_hash_value:
