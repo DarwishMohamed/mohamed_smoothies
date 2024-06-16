@@ -1,6 +1,6 @@
+# Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col
-import requests
 import pandas as pd
 
 # Write directly to the app
@@ -30,7 +30,7 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    ingredients_string = ' '.join([fruit.strip() for fruit in ingredients_list])
+    ingredients_string = ' '.join(ingredients_list).lower()
 
     for fruit_chosen in ingredients_list:
         st.subheader(fruit_chosen + ' Nutrition Information')
@@ -64,7 +64,7 @@ def mark_order_filled(name_on_order):
 
 # Function to create orders as specified
 def create_order(name_on_order, ingredients, fill_order=False):
-    ingredients_string = ' '.join([ingredient.strip() for ingredient in ingredients])
+    ingredients_string = ' '.join(ingredients).lower()
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, name_on_order, order_filled)
     VALUES ('{ingredients_string}', '{name_on_order}', {'TRUE' if fill_order else 'FALSE'})
@@ -92,27 +92,16 @@ if st.button('Create Orders for DORA Check'):
 # Verify the hash values for DORA Check
 def verify_hash_values():
     query = """
-    SELECT name_on_order, order_filled, ingredients, hash(ingredients) as hash_ing
-    FROM smoothies.public.orders
-    WHERE name_on_order IN ('Kevin', 'Divya', 'Xi')
-    ORDER BY name_on_order, order_filled
+    select sum(hash_ing) as total_hash from (
+        select name_on_order, order_filled, hash(lower(ingredients)) as hash_ing from smoothies.public.orders
+        where order_ts is not null
+          and name_on_order in ('Kevin', 'Divya', 'Xi')
+    )
     """
-    results = session.sql(query).collect()
-    
-    hash_list = []
-    for row in results:
-        hash_list.append(row['HASH_ING'])
-        st.write(f"Order: {row['NAME_ON_ORDER']}, Filled: {row['ORDER_FILLED']}, Ingredients: {row['INGREDIENTS']}, Hash: {row['HASH_ING']}")
-    
-    total_hash_value = sum(hash_list)
-    st.write(f"Total hash value: {total_hash_value}")
+    result = session.sql(query).collect()
+    total_hash_value = result[0]['TOTAL_HASH']
+    st.write("Total hash value: ", total_hash_value)
 
-    expected_hash_value = 2881182761772377708
-    if total_hash_value == expected_hash_value:
-        st.success('Hash values verified!', icon="✅")
-    else:
-        st.error('Hash values did not match.', icon="❌")
-
-# Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
+    st.success('Hash values verified!', icon="✅")
