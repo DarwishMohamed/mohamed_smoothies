@@ -113,3 +113,4 @@ def verify_hash_values():
 # Button to verify hash values
 if st.button('Verify Hash Values for DORA Check'):
     verify_hash_values()
+
