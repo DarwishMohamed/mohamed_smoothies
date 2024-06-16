@@ -6,7 +6,7 @@ import pandas as pd
 
 # Write directly to the app
 st.title("Customize Your Smoothie:smoothie:")
-st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
+st.write("Followed challenge lab directions")
 
 # Get the Snowflake session
 cnx = st.connection("snowflake")
