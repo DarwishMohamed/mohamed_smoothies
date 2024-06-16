@@ -83,14 +83,26 @@ if st.button('Truncate Orders Table'):
     st.success('Orders table truncated!', icon="✅")
 
 # Creating orders according to the challenge lab directions
-if st.button('Create Order for Kevin'):
-    create_order('Kevin', ['Apples', 'Lime', 'Ximenia'], fill_order=False)
-
-if st.button('Create Order for Divya'):
+if st.button('Create Orders for Divya and Xi'):
     create_order('Divya', ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries'], fill_order=True)
-
-if st.button('Create Order for Xi'):
     create_order('Xi', ['Vanilla Fruit', 'Nectarine'], fill_order=True)
+    st.success('Orders for Divya and Xi have been created and marked as required!', icon="✅")
+
+# Verify the individual hash values for debugging
+def verify_individual_hash_values():
+    query = """
+    SELECT name_on_order, order_filled, ingredients, HASH(ingredients) AS hash_value
+    FROM smoothies.public.orders
+    WHERE order_ts IS NOT NULL 
+    AND name_on_order IN ('Kevin', 'Divya', 'Xi')
+    """
+    result = session.sql(query).collect()
+    for row in result:
+        st.write(f"Order: {row['NAME_ON_ORDER']}, Filled: {row['ORDER_FILLED']}, Ingredients: {row['INGREDIENTS']}, Hash: {row['HASH_VALUE']}")
+
+# Button to verify individual hash values
+if st.button('Verify Individual Hash Values'):
+    verify_individual_hash_values()
 
 # Verify the hash values for DORA Check
 def verify_hash_values():
