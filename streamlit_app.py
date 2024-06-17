@@ -33,7 +33,7 @@ ingredients_list = st.multiselect(
 
 def calculate_hash(ingredients):
     ingredients_string= ' '.join(ingredients).strip()
-    return int(hashlib.md5(ingredients_strip.encode()).hexdigest(),16)
+    return int(hashlib.md5(ingredients_string.encode()).hexdigest(),16)
 
 if ingredients_list:
     ingredients_string = ''
