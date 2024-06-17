@@ -25,21 +25,13 @@ ingredients_list = st.multiselect(
     my_dataframe
 )
 
-def calculate_hash_space_delimiter(ingredients):
-    ingredients_string = ' '.join(ingredients).strip()
-    return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
-
-def calculate_hash_comma_delimiter(ingredients):
-    ingredients_string = ','.join(ingredients).strip()
-    return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
-
-def calculate_hash_comma_space_delimiter(ingredients):
+def calculate_hash(ingredients):
     ingredients_string = ', '.join(ingredients).strip()
     return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
 
 if ingredients_list:
     ingredients_string = ', '.join(ingredients_list)
-
+    
     for fruit_chosen in ingredients_list:
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
         st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
@@ -48,17 +40,8 @@ if ingredients_list:
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
-    hash_space = calculate_hash_space_delimiter(ingredients_list)
-    hash_comma = calculate_hash_comma_delimiter(ingredients_list)
-    hash_comma_space = calculate_hash_comma_space_delimiter(ingredients_list)
-    
-    st.write(f"Hash using space as delimiter: {hash_space}")
-    st.write(f"Hash using comma as delimiter: {hash_comma}")
-    st.write(f"Hash using comma and space as delimiter: {hash_comma_space}")
+    hash_ing = calculate_hash(ingredients_list)
 
-    # Use the hash with comma and space as delimiter for the insert
-    hash_ing = hash_comma_space
-    
     st.write(f"Calculated hash: {hash_ing}")
 
     my_insert_stmt = """
