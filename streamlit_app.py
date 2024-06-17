@@ -27,7 +27,9 @@ ingredients_list = st.multiselect(
 
 def calculate_hash(ingredients, encoding='utf-8'):
   ingredients_string = ', '.join(ingredients).strip()
+  print("Ingredient String:", ingredients_string)  # Inspect for whitespace, order
   return hashlib.md5(ingredients_string.encode(encoding)).hexdigest()
+
 
 
 if ingredients_list:
