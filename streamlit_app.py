@@ -1,20 +1,3 @@
-What needs to be done : 
-
-1) Automate email being sent to lewis so that it automatically sends every monday with the filter for shell and unilever 
-2) Need to write some code which automates an email being sent to the respective account managers form the salesforce table and automatically detects clients from the table and sends email every monady morning
-3) mitigae SMTP error 
-4) email automation to jack task 
-
-
-1) change your code so that the coresignal goldlayer table is uk_us_data_jobs_skills not job_industries then do a pull request (both you and faith need to do one) 
-2) Need to make test out faith's email automation code 
-3) try to get any python script to run on scheduler, if it does, replicate that with email_automation_general 
-
-
-
-
-
-
 
 
 
