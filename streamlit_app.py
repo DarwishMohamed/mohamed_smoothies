@@ -43,10 +43,11 @@ if ingredients_list:
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True) 
 
     # st.write(ingredients_string)
+    my_insert_stmt = """
+    INSERT INTO smoothies.public.orders(ingredients, name_on_order, order_filled)
+    VALUES ('""" + ingredients_string.strip() + """', '""" + name_on_order + """', '""" + str(order_filled).upper() + """')
+"""
 
-    my_insert_stmt = """ 
-    INSERT INTO smoothies.public.orders(ingredients, name_on_order)
-    VALUES ('""" + ingredients_string.strip() + """', '""" + name_on_order + """')"""
 
     st.write(my_insert_stmt)
 
