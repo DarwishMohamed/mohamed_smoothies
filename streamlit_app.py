@@ -34,7 +34,9 @@ if ingredients_list:
     
     for fruit_chosen in ingredients_list:
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        fruit_option = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'FRUIT_NAME'].iloc[0]
         st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
+        st.write('The fruit option value for ', fruit_chosen, ' is ', fruit_option, '.')
 
         st.subheader(fruit_chosen + ' Nutrition Information')
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
@@ -50,12 +52,20 @@ if ingredients_list:
     hash_using_search_on_comma = calculate_hash(search_on_list, ',')
     hash_using_search_on_comma_space = calculate_hash(search_on_list, ', ')
 
+    fruit_option_list = [pd_df.loc[pd_df['FRUIT_NAME'] == fruit, 'FRUIT_NAME'].iloc[0] for fruit in ingredients_list]
+    hash_using_fruit_option_space = calculate_hash(fruit_option_list, ' ')
+    hash_using_fruit_option_comma = calculate_hash(fruit_option_list, ',')
+    hash_using_fruit_option_comma_space = calculate_hash(fruit_option_list, ', ')
+
     st.write(f"Hash using FRUIT_NAME with space as delimiter: {hash_using_fruit_name_space}")
     st.write(f"Hash using FRUIT_NAME with comma as delimiter: {hash_using_fruit_name_comma}")
     st.write(f"Hash using FRUIT_NAME with comma and space as delimiter: {hash_using_fruit_name_comma_space}")
     st.write(f"Hash using SEARCH_ON with space as delimiter: {hash_using_search_on_space}")
     st.write(f"Hash using SEARCH_ON with comma as delimiter: {hash_using_search_on_comma}")
     st.write(f"Hash using SEARCH_ON with comma and space as delimiter: {hash_using_search_on_comma_space}")
+    st.write(f"Hash using FRUIT_OPTION with space as delimiter: {hash_using_fruit_option_space}")
+    st.write(f"Hash using FRUIT_OPTION with comma as delimiter: {hash_using_fruit_option_comma}")
+    st.write(f"Hash using FRUIT_OPTION with comma and space as delimiter: {hash_using_fruit_option_comma_space}")
 
     # Default hash used in INSERT statement (update as necessary)
     hash_ing = hash_using_fruit_name_comma_space
