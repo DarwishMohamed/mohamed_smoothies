@@ -27,32 +27,6 @@ ingredients_list = st.multiselect(
     my_dataframe
 )
 
-import hashlib
-
-def calculate_hash(ingredients):
-    ingredients_string = ', '.join(ingredients).strip()
-    return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
-
-# Ingredients as specified in the DORA checker
-kevin_ingredients = ['Apples', 'Lime', 'Ximenia']
-divya_ingredients = ['Dragon Fruit', 'Guava', 'Figs', 'Jackfruit', 'Blueberries']
-xi_ingredients = ['Vanilla Fruit', 'Nectarine']
-
-# Calculate hashes
-kevin_hash = calculate_hash(kevin_ingredients)
-divya_hash = calculate_hash(divya_ingredients)
-xi_hash = calculate_hash(xi_ingredients)
-
-print(f"Kevin's hash: {kevin_hash}")
-print(f"Divya's hash: {divya_hash}")
-print(f"Xi's hash: {xi_hash}")
-
-
-
-
-
-
-
 if ingredients_list:
     ingredients_string = ''
 
