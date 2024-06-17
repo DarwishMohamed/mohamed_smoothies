@@ -26,28 +26,41 @@ ingredients_list = st.multiselect(
 
 def calculate_hash(ingredients):
     ingredients_string = ' '.join(ingredients).strip()
-    # Calculate MD5 hash and convert to an integer
     return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
 
 if ingredients_list:
     ingredients_string_list = []
+    search_on_string_list = []
 
     for fruit_chosen in ingredients_list:
         ingredients_string_list.append(fruit_chosen)
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        search_on_string_list.append(search_on)
         st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
 
         st.subheader(fruit_chosen + ' Nutrition Information')
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
-    # Create the ingredients string from FRUIT_NAME values
+    # Create the different ingredient strings
     ingredients_string = ' '.join(ingredients_string_list).strip()
-    hash_ing = calculate_hash(ingredients_string_list)
+    search_on_string = ' '.join(search_on_string_list).strip()
 
-    my_insert_stmt = """
+    # Calculate hashes for each method
+    hash_using_fruit_name = calculate_hash(ingredients_string_list)
+    hash_using_search_on = calculate_hash(search_on_string_list)
+    hash_using_ingredients_string = calculate_hash(ingredients_string)
+
+    st.write(f"Hash using FRUIT_NAME: {hash_using_fruit_name}")
+    st.write(f"Hash using SEARCH_ON: {hash_using_search_on}")
+    st.write(f"Hash using concatenated string: {hash_using_ingredients_string}")
+
+    # Choose one of the methods for the insert statement (adjust as needed based on results)
+    chosen_hash = hash_using_fruit_name  # Change this based on which hash matches the expected value
+
+    my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders(ingredients, name_on_order, order_filled, hash_ing)
-    VALUES ('""" + ingredients_string + """', '""" + name_on_order + """', '""" + str(order_filled).upper() + """', """ + str(hash_ing) + """)
+    VALUES ('{ingredients_string}', '{name_on_order}', '{str(order_filled).upper()}', {chosen_hash})
     """
 
     st.write(my_insert_stmt)
