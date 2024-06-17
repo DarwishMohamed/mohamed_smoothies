@@ -25,9 +25,10 @@ ingredients_list = st.multiselect(
     my_dataframe
 )
 
-def calculate_hash(ingredients):
-    ingredients_string = ', '.join(ingredients).strip()
-    return hashlib.md5(ingredients_string.encode('latin-1')).hexdigest()
+def calculate_hash(ingredients, encoding='utf-8'):
+  ingredients_string = ', '.join(ingredients).strip()
+  return hashlib.md5(ingredients_string.encode(encoding)).hexdigest()
+
 
 if ingredients_list:
     ingredients_string = ', '.join(ingredients_list)
