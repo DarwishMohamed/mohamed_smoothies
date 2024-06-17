@@ -26,8 +26,9 @@ ingredients_list = st.multiselect(
 )
 
 def calculate_hash(ingredients, delimiter):
+    ingredients.sort()  # Sorting the ingredients
     ingredients_string = delimiter.join(ingredients).strip()
-    return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
+    return int(hashlib.md5(ingredients_string.encode('utf-8')).hexdigest(), 16)
 
 if ingredients_list:
     # Generate ingredient strings using different sources
