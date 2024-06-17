@@ -25,8 +25,8 @@ ingredients_list = st.multiselect(
     pd_df['FRUIT_NAME'].tolist()
 )
 
-def calculate_hash(ingredients):
-    ingredients_string = ', '.join(ingredients).strip()
+def calculate_hash(ingredients, delimiter):
+    ingredients_string = delimiter.join(ingredients).strip()
     return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
 
 if ingredients_list:
@@ -40,7 +40,25 @@ if ingredients_list:
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
-    hash_ing = calculate_hash(ingredients_list)
+    # Calculate hashes using different delimiters and sources
+    hash_using_fruit_name_space = calculate_hash(ingredients_list, ' ')
+    hash_using_fruit_name_comma = calculate_hash(ingredients_list, ',')
+    hash_using_fruit_name_comma_space = calculate_hash(ingredients_list, ', ')
+
+    search_on_list = [pd_df.loc[pd_df['FRUIT_NAME'] == fruit, 'SEARCH_ON'].iloc[0] for fruit in ingredients_list]
+    hash_using_search_on_space = calculate_hash(search_on_list, ' ')
+    hash_using_search_on_comma = calculate_hash(search_on_list, ',')
+    hash_using_search_on_comma_space = calculate_hash(search_on_list, ', ')
+
+    st.write(f"Hash using FRUIT_NAME with space as delimiter: {hash_using_fruit_name_space}")
+    st.write(f"Hash using FRUIT_NAME with comma as delimiter: {hash_using_fruit_name_comma}")
+    st.write(f"Hash using FRUIT_NAME with comma and space as delimiter: {hash_using_fruit_name_comma_space}")
+    st.write(f"Hash using SEARCH_ON with space as delimiter: {hash_using_search_on_space}")
+    st.write(f"Hash using SEARCH_ON with comma as delimiter: {hash_using_search_on_comma}")
+    st.write(f"Hash using SEARCH_ON with comma and space as delimiter: {hash_using_search_on_comma_space}")
+
+    # Default hash used in INSERT statement (update as necessary)
+    hash_ing = hash_using_fruit_name_comma_space
     st.write(f"Calculated hash: {hash_ing}")
 
     my_insert_stmt = f"""
