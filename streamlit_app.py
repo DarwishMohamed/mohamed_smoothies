@@ -26,7 +26,7 @@ pd_df = my_dataframe.to_pandas()
 
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients',
-    my_dataframe
+    my_dataframe.select(col('FRUIT_NAME')).collect()
 )
 
 def calculate_hash(ingredients):
@@ -34,34 +34,18 @@ def calculate_hash(ingredients):
     return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
 
 if ingredients_list:
-    ingredients_string = ''
-    search_on_list = []
+    ingredients_string = ' '.join(ingredients_list).strip()
+    hash_ing = calculate_hash(ingredients_list)
 
-    for fruit_chosen in ingredients_list:
-        ingredients_string += fruit_chosen + ' '
-        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        search_on_list.append(search_on)
-        st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
-
-        st.subheader(fruit_chosen + ' Nutrition Information')
-        fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
-        fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True) 
-
-    # Print the concatenated ingredients string
-    st.write(f"Concatenated ingredients string: '{ingredients_string.strip()}'")
-    
-    # Print the list used for hash calculation
-    st.write(f"List used for hash calculation: {search_on_list}")
-
-    # Calculate hash using the search_on values
-    hash_ing = calculate_hash(search_on_list)
+    st.write(f"Concatenated ingredients string: '{ingredients_string}'")
+    st.write(f"List used for hash calculation: {ingredients_list}")
     st.write(f"Calculated hash: {hash_ing}")
 
     # st.write(ingredients_string)
     my_insert_stmt = """
     INSERT INTO smoothies.public.orders(ingredients, name_on_order, order_filled, hash_ing)
     VALUES ('""" + ingredients_string.strip() + """', '""" + name_on_order + """', '""" + str(order_filled).upper() + """', '""" + str(hash_ing) + """')
-"""
+    """
 
     st.write(my_insert_stmt)
 
