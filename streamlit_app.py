@@ -50,7 +50,7 @@ if ingredients_list:
 
 
 
-hash_ing = calculate_hash(ingredients_list)
+    hash_ing = calculate_hash(ingredients_list)
 
     
     # st.write(ingredients_string)
