@@ -37,11 +37,13 @@ def calculate_hash(ingredients):
 
 if ingredients_list:
     ingredients_string = ''
+    ingredients_for_hash = []
 
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
         
         search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        ingredients_for_hash.append(search_on)
         st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
 
         st.subheader(fruit_chosen + 'Nutrition Information')
@@ -55,9 +57,9 @@ if ingredients_list:
     
     # st.write(ingredients_string)
     my_insert_stmt = """
-    INSERT INTO smoothies.public.orders(ingredients, name_on_order, order_filled)
-    VALUES ('""" + ingredients_string.strip() + """', '""" + name_on_order + """', '""" + str(order_filled).upper() + """')
-"""
+    INSERT INTO smoothies.public.orders(ingredients, name_on_order, order_filled, hash_ing)
+    VALUES ('""" + ingredients_string.strip() + """', '""" + name_on_order + """', '""" + str(order_filled).upper() + """', '""" + str(hash_ing) + """')
+    """
 
 
     st.write(my_insert_stmt)
