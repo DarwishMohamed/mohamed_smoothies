@@ -4,6 +4,11 @@ from snowflake.snowpark.functions import col
 import requests
 import hashlib
 
+# Function to calculate hash
+def calculate_hash(ingredients):
+    ingredients_string = ', '.join(ingredients).strip()
+    return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
+
 # Write directly to the app
 st.title("Customize Your Smoothie 🍹")
 st.write("E5tar el fakha el enta 3ayezha w engez mat2refnash")
