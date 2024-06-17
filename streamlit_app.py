@@ -30,11 +30,11 @@ ingredients_list = st.multiselect(
 )
 
 def calculate_hash(ingredients):
-    ingredients_string = ' '.join(ingredients).strip()
+    ingredients_string = ', '.join(ingredients).strip()
     return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
 
 if ingredients_list:
-    ingredients_string = ' '.join(ingredients_list).strip()
+    ingredients_string = ', '.join(ingredients_list).strip()
     hash_ing = calculate_hash(ingredients_list)
 
     st.write(f"Concatenated ingredients string: '{ingredients_string}'")
