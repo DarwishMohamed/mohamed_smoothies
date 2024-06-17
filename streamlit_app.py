@@ -2,6 +2,8 @@
 import streamlit as st
 from snowflake.snowpark.functions import col
 import requests 
+import hashlib
+
 
 # Write directly to the app
 st.title("Customize Your Smoothie 🍹")
@@ -29,6 +31,10 @@ ingredients_list = st.multiselect(
     my_dataframe
 )
 
+def calculate_hash(ingredients):
+    ingredients_string= ' '.join(ingredients).strip()
+    return int(hashlib.md5(ingredients_strip.encode()).hexdigest(),16)
+
 if ingredients_list:
     ingredients_string = ''
 
@@ -42,6 +48,11 @@ if ingredients_list:
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + fruit_chosen)
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True) 
 
+
+
+hash_ing = calculate_hash(ingredients_list)
+
+    
     # st.write(ingredients_string)
     my_insert_stmt = """
     INSERT INTO smoothies.public.orders(ingredients, name_on_order, order_filled)
