@@ -41,6 +41,7 @@ if ingredients_list:
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
     hash_ing = calculate_hash(ingredients_list)
+    st.write(f"Calculated hash: {hash_ing}")
 
     # st.write(ingredients_string)
     my_insert_stmt = """
