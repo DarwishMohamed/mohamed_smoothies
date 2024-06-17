@@ -25,7 +25,15 @@ ingredients_list = st.multiselect(
     my_dataframe
 )
 
-def calculate_hash(ingredients):
+def calculate_hash_space_delimiter(ingredients):
+    ingredients_string = ' '.join(ingredients).strip()
+    return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
+
+def calculate_hash_comma_delimiter(ingredients):
+    ingredients_string = ','.join(ingredients).strip()
+    return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
+
+def calculate_hash_comma_space_delimiter(ingredients):
     ingredients_string = ', '.join(ingredients).strip()
     return int(hashlib.md5(ingredients_string.encode()).hexdigest(), 16)
 
@@ -40,10 +48,19 @@ if ingredients_list:
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
-    hash_ing = calculate_hash(ingredients_list)
+    hash_space = calculate_hash_space_delimiter(ingredients_list)
+    hash_comma = calculate_hash_comma_delimiter(ingredients_list)
+    hash_comma_space = calculate_hash_comma_space_delimiter(ingredients_list)
+    
+    st.write(f"Hash using space as delimiter: {hash_space}")
+    st.write(f"Hash using comma as delimiter: {hash_comma}")
+    st.write(f"Hash using comma and space as delimiter: {hash_comma_space}")
+
+    # Use the hash with comma and space as delimiter for the insert
+    hash_ing = hash_comma_space
+    
     st.write(f"Calculated hash: {hash_ing}")
 
-    # st.write(ingredients_string)
     my_insert_stmt = """
     INSERT INTO smoothies.public.orders(ingredients, name_on_order, order_filled, hash_ing)
     VALUES ('""" + ingredients_string + """', '""" + name_on_order + """', '""" + str(order_filled).upper() + """', '""" + str(hash_ing) + """')
